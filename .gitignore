@@ -3,4 +3,4 @@ __pycache__/
 .vscode/
 amazon_debug.html
 amazon_selenium_debug.html
-data/amazon_analyzer.db
+data/amazon_analyzer.db 
