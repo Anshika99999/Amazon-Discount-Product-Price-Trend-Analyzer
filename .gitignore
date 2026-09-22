@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.vscode/
+amazon_debug.html
+amazon_selenium_debug.html
+data/amazon_analyzer.db
