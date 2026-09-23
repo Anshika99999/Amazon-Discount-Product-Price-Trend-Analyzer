@@ -1095,10 +1095,7 @@ class AmazonAnalyzer(ctk.CTk):
     # BEST DEALS
     # ========================================================
 
-    def create_best_deals(
-        self,
-        best_deals
-    ):
+    def create_best_deals(self, best_deals):
 
         card = ctk.CTkFrame(
             self.content,
@@ -1109,7 +1106,8 @@ class AmazonAnalyzer(ctk.CTk):
         )
 
         card.pack(
-            fill="x"
+            fill="x",
+            pady=0
         )
 
         header = ctk.CTkFrame(
@@ -1131,9 +1129,7 @@ class AmazonAnalyzer(ctk.CTk):
                 size=17,
                 weight="bold"
             )
-        ).pack(
-            side="left"
-        )
+        ).pack(side="left")
 
         ctk.CTkButton(
             header,
@@ -1144,62 +1140,52 @@ class AmazonAnalyzer(ctk.CTk):
             fg_color="transparent",
             hover_color=self.card_hover,
             text_color=self.accent,
-            font=ctk.CTkFont(
-                size=10
-            ),
+            font=ctk.CTkFont(size=10),
             command=self.show_deals
-        ).pack(
-            side="right"
-        )
+        ).pack(side="right")
 
-        columns = ctk.CTkFrame(
+        table = ctk.CTkFrame(
             card,
             fg_color="#101724",
             corner_radius=8
         )
 
-        columns.pack(
+        table.pack(
             fill="x",
             padx=15,
-            pady=(0, 5)
+            pady=(0, 15)
         )
 
-               headings = [
+        table.grid_columnconfigure(0, weight=5, minsize=380)
+        table.grid_columnconfigure(1, weight=2, minsize=150)
+        table.grid_columnconfigure(2, weight=2, minsize=140)
+        table.grid_columnconfigure(3, weight=2, minsize=140)
+
+        headings = [
             ("PRODUCT", 0),
             ("CURRENT PRICE", 1),
             ("DISCOUNT", 2),
             ("DEAL SCORE", 3)
         ]
 
-        # Configure fixed column proportions
-        columns.grid_columnconfigure(0, weight=5)
-        columns.grid_columnconfigure(1, weight=2)
-        columns.grid_columnconfigure(2, weight=2)
-        columns.grid_columnconfigure(3, weight=2)
-
-        # Table header
         for text, column in headings:
-
             ctk.CTkLabel(
-                columns,
+                table,
                 text=text,
                 text_color="#64748B",
-                font=ctk.CTkFont(
-                    size=9,
-                    weight="bold"
-                )
+                font=ctk.CTkFont(size=9, weight="bold"),
+                anchor="w"
             ).grid(
                 row=0,
                 column=column,
                 sticky="w",
                 padx=15,
-                pady=10
+                pady=12
             )
 
         if best_deals.empty:
-
             ctk.CTkLabel(
-                columns,
+                table,
                 text="No deal data available.",
                 text_color=self.text_secondary
             ).grid(
@@ -1208,116 +1194,82 @@ class AmazonAnalyzer(ctk.CTk):
                 columnspan=4,
                 pady=25
             )
-
             return
 
-        # Product rows
         for row_index, (_, product) in enumerate(
             best_deals.iterrows(),
             start=1
         ):
+            table.grid_rowconfigure(row_index, minsize=55)
 
-            name = str(
-                product["name"]
-            )
+            name = str(product.get("name", "Unknown product"))
+            short_name = name[:55] + "..." if len(name) > 55 else name
 
-            short_name = (
-                name[:42] + "..."
-                if len(name) > 42
-                else name
-            )
+            price = product.get("price")
+            discount = product.get("discount_percentage")
+            score = product.get("deal_score", 0)
 
-            price = product["price"]
+            if pd.notna(price):
+                try:
+                    price_text = f"₹{float(price):,.0f}"
+                except (TypeError, ValueError):
+                    price_text = "N/A"
+            else:
+                price_text = "N/A"
 
-            price_text = (
-                f"₹{float(price):,.0f}"
-                if pd.notna(price)
-                else "N/A"
-            )
+            if pd.notna(discount):
+                try:
+                    discount_text = f"{float(discount):.1f}%"
+                except (TypeError, ValueError):
+                    discount_text = "N/A"
+            else:
+                discount_text = "N/A"
 
-            discount = product[
-                "discount_percentage"
-            ]
+            try:
+                score_value = float(score)
+            except (TypeError, ValueError):
+                score_value = 0
 
-            discount_text = (
-                f"{float(discount):.1f}%"
-                if pd.notna(discount)
-                else "N/A"
-            )
-
-            score = float(
-                product["deal_score"]
-            )
-
-            # Product
             ctk.CTkLabel(
-                columns,
+                table,
                 text=short_name,
                 text_color=self.text_primary,
-                font=ctk.CTkFont(
-                    size=10,
-                    weight="bold"
-                ),
-                anchor="w"
+                font=ctk.CTkFont(size=10, weight="bold"),
+                anchor="w",
+                justify="left",
+                wraplength=350
             ).grid(
-                row=row_index,
-                column=0,
-                sticky="w",
-                padx=15,
-                pady=12
+                row=row_index, column=0, sticky="w", padx=15, pady=10
             )
 
-            # Current Price
             ctk.CTkLabel(
-                columns,
+                table,
                 text=price_text,
                 text_color=self.text_primary,
-                font=ctk.CTkFont(
-                    size=11
-                ),
+                font=ctk.CTkFont(size=11),
                 anchor="w"
             ).grid(
-                row=row_index,
-                column=1,
-                sticky="w",
-                padx=15,
-                pady=12
+                row=row_index, column=1, sticky="w", padx=15, pady=10
             )
 
-            # Discount
             ctk.CTkLabel(
-                columns,
+                table,
                 text=discount_text,
                 text_color="#22C55E",
-                font=ctk.CTkFont(
-                    size=11,
-                    weight="bold"
-                ),
+                font=ctk.CTkFont(size=11, weight="bold"),
                 anchor="w"
             ).grid(
-                row=row_index,
-                column=2,
-                sticky="w",
-                padx=15,
-                pady=12
+                row=row_index, column=2, sticky="w", padx=15, pady=10
             )
 
-            # Deal Score
             ctk.CTkLabel(
-                columns,
-                text=f"{score:.0f}/100",
+                table,
+                text=f"{score_value:.0f}/100",
                 text_color=self.accent,
-                font=ctk.CTkFont(
-                    size=11,
-                    weight="bold"
-                ),
+                font=ctk.CTkFont(size=11, weight="bold"),
                 anchor="w"
             ).grid(
-                row=row_index,
-                column=3,
-                sticky="w",
-                padx=15,
-                pady=12
+                row=row_index, column=3, sticky="w", padx=15, pady=10
             )
 
     # ========================================================
