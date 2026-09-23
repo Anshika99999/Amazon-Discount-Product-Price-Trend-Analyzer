@@ -1164,19 +1164,21 @@ class AmazonAnalyzer(ctk.CTk):
             pady=(0, 5)
         )
 
-        headings = [
+               headings = [
             ("PRODUCT", 0),
             ("CURRENT PRICE", 1),
             ("DISCOUNT", 2),
             ("DEAL SCORE", 3)
         ]
 
-        for text, column in headings:
+        # Configure fixed column proportions
+        columns.grid_columnconfigure(0, weight=5)
+        columns.grid_columnconfigure(1, weight=2)
+        columns.grid_columnconfigure(2, weight=2)
+        columns.grid_columnconfigure(3, weight=2)
 
-            columns.grid_columnconfigure(
-                column,
-                weight=1
-            )
+        # Table header
+        for text, column in headings:
 
             ctk.CTkLabel(
                 columns,
@@ -1197,34 +1199,23 @@ class AmazonAnalyzer(ctk.CTk):
         if best_deals.empty:
 
             ctk.CTkLabel(
-                card,
+                columns,
                 text="No deal data available.",
                 text_color=self.text_secondary
-            ).pack(
+            ).grid(
+                row=1,
+                column=0,
+                columnspan=4,
                 pady=25
             )
 
             return
 
-        for _, product in best_deals.iterrows():
-
-            row = ctk.CTkFrame(
-                card,
-                fg_color="transparent"
-            )
-
-            row.pack(
-                fill="x",
-                padx=15,
-                pady=2
-            )
-
-            for column in range(4):
-
-                row.grid_columnconfigure(
-                    column,
-                    weight=1
-                )
+        # Product rows
+        for row_index, (_, product) in enumerate(
+            best_deals.iterrows(),
+            start=1
+        ):
 
             name = str(
                 product["name"]
@@ -1258,8 +1249,9 @@ class AmazonAnalyzer(ctk.CTk):
                 product["deal_score"]
             )
 
+            # Product
             ctk.CTkLabel(
-                row,
+                columns,
                 text=short_name,
                 text_color=self.text_primary,
                 font=ctk.CTkFont(
@@ -1268,55 +1260,64 @@ class AmazonAnalyzer(ctk.CTk):
                 ),
                 anchor="w"
             ).grid(
-                row=0,
+                row=row_index,
                 column=0,
                 sticky="w",
                 padx=15,
                 pady=12
             )
 
+            # Current Price
             ctk.CTkLabel(
-                row,
+                columns,
                 text=price_text,
                 text_color=self.text_primary,
                 font=ctk.CTkFont(
                     size=11
-                )
+                ),
+                anchor="w"
             ).grid(
-                row=0,
+                row=row_index,
                 column=1,
                 sticky="w",
-                padx=15
+                padx=15,
+                pady=12
             )
 
+            # Discount
             ctk.CTkLabel(
-                row,
+                columns,
                 text=discount_text,
                 text_color="#22C55E",
                 font=ctk.CTkFont(
                     size=11,
                     weight="bold"
-                )
+                ),
+                anchor="w"
             ).grid(
-                row=0,
+                row=row_index,
                 column=2,
                 sticky="w",
-                padx=15
+                padx=15,
+                pady=12
             )
 
+            # Deal Score
             ctk.CTkLabel(
-                row,
+                columns,
                 text=f"{score:.0f}/100",
                 text_color=self.accent,
                 font=ctk.CTkFont(
                     size=11,
                     weight="bold"
-                )
+                ),
+                anchor="w"
             ).grid(
-                row=0,
+                row=row_index,
                 column=3,
                 sticky="w",
-                padx=15
+                padx=15,
+                pady=12
             )
 
     # ========================================================
